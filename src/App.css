@@ -96,3 +96,44 @@
   background-color: #f8f9fa;
   text-align: left;
 }
+
+.light {
+  background-color: #f4f6f8;
+  color: #222;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.dark {
+  background-color: #121212;
+  color: #eee;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.dark .card {
+  background-color: #1e1e1e;
+  border-color: #333;
+  box-shadow: 0 2px 5px rgba(255,255,255,0.1);
+}
+
+.dark input,
+.dark select {
+  background-color: #333;
+  color: #eee;
+  border: 1px solid #555;
+}
+
+.dark button,
+.dark .button {
+  background-color: #007bff;
+  color: white;
+}
+
+.dark button:hover {
+  background-color: #0056b3;
+}
+
+.dark .logout-btn {
+  background-color: #b33a3a;
+}

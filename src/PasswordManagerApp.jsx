@@ -17,6 +17,8 @@ export default function PasswordManagerApp() {
   const [sitePassword, setSitePassword] = useState('');
   const { addToast } = useToast();
   const [passwordList, setPasswordList] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
+
 
 
   useEffect(() => {
@@ -102,6 +104,14 @@ export default function PasswordManagerApp() {
     addToast('Logged out');
   };
 
+  <button
+    className="dark-mode-toggle"
+    onClick={() => setDarkMode((prev) => !prev)}
+  >
+    {darkMode ? 'Light Mode' : 'Dark Mode'}
+  </button>
+
+
   const fetchPasswords = async () => {
     try {
       const res = await axios.get(`${API}/passwords`, {
@@ -129,57 +139,59 @@ export default function PasswordManagerApp() {
   }
 
   return (
-    <div className="container">
-      <button className="logout-btn" onClick={logout}>Logout</button>
+    <div className={darkMode ? 'dark' : 'light'}>
+      <div className="container">
+        <button className="logout-btn" onClick={logout}>Logout</button>
 
-      <div className="card">
-        <h2>Add Website</h2>
-        <input placeholder="Website Name" onChange={(e) => setWebsiteName(e.target.value)} />
-        <input placeholder="Website URL" onChange={(e) => setWebsiteUrl(e.target.value)} />
-        <button onClick={addWebsite}>Add</button>
-      </div>
+        <div className="card">
+          <h2>Add Website</h2>
+          <input placeholder="Website Name" onChange={(e) => setWebsiteName(e.target.value)} />
+          <input placeholder="Website URL" onChange={(e) => setWebsiteUrl(e.target.value)} />
+          <button onClick={addWebsite}>Add</button>
+        </div>
 
-      <div className="card">
-        <h2>Save Credentials</h2>
-        <select value={selectedWebsite} onChange={(e) => setSelectedWebsite(e.target.value)}>
-          <option value="">Select Website</option>
-          {websites.map((site) => (
-            <option key={site.id} value={site.id}>{site.name}</option>
-          ))}
-        </select>
-        <input placeholder="Site Username" onChange={(e) => setSiteUsername(e.target.value)} />
-        <input type="password" placeholder="Site Password" onChange={(e) => setSitePassword(e.target.value)} />
-        <button onClick={savePasswordDetails}>Save</button>
-      </div>
-      
-      <div className="password-list">
-        <h3>Saved Passwords</h3>
-        {passwordList.length === 0 ? (
-          <p>No passwords saved yet.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Website</th>
-                <th>Username</th>
-                <th>Created</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {passwordList.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.websiteName}</td>
-                  <td>{p.username}</td>
-                  <td>{new Date(p.createdAt).toLocaleDateString()}</td>
-                  <td>{new Date(p.updatedAt).toLocaleDateString()}</td>
+        <div className="card">
+          <h2>Save Credentials</h2>
+          <select value={selectedWebsite} onChange={(e) => setSelectedWebsite(e.target.value)}>
+            <option value="">Select Website</option>
+            {websites.map((site) => (
+              <option key={site.id} value={site.id}>{site.name}</option>
+            ))}
+          </select>
+          <input placeholder="Site Username" onChange={(e) => setSiteUsername(e.target.value)} />
+          <input type="password" placeholder="Site Password" onChange={(e) => setSitePassword(e.target.value)} />
+          <button onClick={savePasswordDetails}>Save</button>
+        </div>
+
+        <div className="password-list">
+          <h3>Saved Passwords</h3>
+          {passwordList.length === 0 ? (
+            <p>No passwords saved yet.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Website</th>
+                  <th>Username</th>
+                  <th>Created</th>
+                  <th>Updated</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {passwordList.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.websiteName}</td>
+                    <td>{p.username}</td>
+                    <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(p.updatedAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
 
+      </div>
     </div>
   );
 }
