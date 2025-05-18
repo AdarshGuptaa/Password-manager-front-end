@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ToastProvider, useToast } from './ToastContext';
 import axios from 'axios';
-import './PasswordManagerApp.css'; 
+import './PasswordManagerApp.css';
 
 const API = 'http://localhost:8080';
 
@@ -16,10 +16,16 @@ export default function PasswordManagerApp() {
   const [siteUsername, setSiteUsername] = useState('');
   const [sitePassword, setSitePassword] = useState('');
   const { addToast } = useToast();
+  const [passwordList, setPasswordList] = useState([]);
+
 
   useEffect(() => {
-    if (token) fetchWebsites();
+    if (token) {
+      fetchWebsites();
+      fetchPasswords();
+    }
   }, [token]);
+
 
   const fetchWebsites = async () => {
     try {
@@ -81,18 +87,32 @@ export default function PasswordManagerApp() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      addToast('Password saved successfully');
+      addToast('Password saved!', 'success');
+      fetchPasswords();
     } catch (err) {
       console.error(err);
-      addToast('Failed to save the password.', 'error');
+      addToast('Failed to save password.', 'error');
     }
   };
+
 
   const logout = () => {
     localStorage.removeItem('jwt');
     setToken('');
     addToast('Logged out');
   };
+
+  const fetchPasswords = async () => {
+    try {
+      const res = await axios.get(`${API}/passwords`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPasswordList(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   if (!token) {
     return (
@@ -131,6 +151,35 @@ export default function PasswordManagerApp() {
         <input type="password" placeholder="Site Password" onChange={(e) => setSitePassword(e.target.value)} />
         <button onClick={savePasswordDetails}>Save</button>
       </div>
+      
+      <div className="password-list">
+        <h3>Saved Passwords</h3>
+        {passwordList.length === 0 ? (
+          <p>No passwords saved yet.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Website</th>
+                <th>Username</th>
+                <th>Created</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {passwordList.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.websiteName}</td>
+                  <td>{p.username}</td>
+                  <td>{new Date(p.createdAt).toLocaleDateString()}</td>
+                  <td>{new Date(p.updatedAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
     </div>
   );
 }

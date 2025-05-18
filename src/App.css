@@ -80,5 +80,19 @@
   }
 }
 
+.password-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
 
+.password-list th,
+.password-list td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
 
+.password-list th {
+  background-color: #f8f9fa;
+  text-align: left;
+}
