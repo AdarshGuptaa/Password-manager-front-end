@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { ToastProvider, useToast } from './ToastContext';
 import axios from 'axios';
+import './PasswordManagerApp.css'; 
 
-const API = 'http://localhost:8080'; // Change to match your backend URL
+const API = 'http://localhost:8080';
 
 export default function PasswordManagerApp() {
   const [token, setToken] = useState(localStorage.getItem('jwt') || '');
@@ -16,6 +15,7 @@ export default function PasswordManagerApp() {
   const [selectedWebsite, setSelectedWebsite] = useState('');
   const [siteUsername, setSiteUsername] = useState('');
   const [sitePassword, setSitePassword] = useState('');
+  const { addToast } = useToast();
 
   useEffect(() => {
     if (token) fetchWebsites();
@@ -37,8 +37,10 @@ export default function PasswordManagerApp() {
       const res = await axios.post(`${API}/login`, { email, password });
       localStorage.setItem('jwt', res.data.token);
       setToken(res.data.token);
+      addToast('Login successful', 'success');
     } catch (err) {
       console.error(err);
+      addToast('Login failed. Please check your credentials.', 'error');
     }
   };
 
@@ -46,8 +48,10 @@ export default function PasswordManagerApp() {
     try {
       await axios.post(`${API}/signup`, { email, password });
       handleLogin();
+      addToast('Signed up!');
     } catch (err) {
       console.error(err);
+      addToast('Sign up failed', 'error');
     }
   };
 
@@ -59,8 +63,10 @@ export default function PasswordManagerApp() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchWebsites();
+      addToast('Website added');
     } catch (err) {
       console.error(err);
+      addToast('website addition failed.', 'error');
     }
   };
 
@@ -75,65 +81,64 @@ export default function PasswordManagerApp() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      addToast('Password saved successfully');
     } catch (err) {
       console.error(err);
+      addToast('Failed to save the password.', 'error');
     }
   };
 
   const logout = () => {
     localStorage.removeItem('jwt');
     setToken('');
+    addToast('Logged out');
   };
 
   if (!token) {
     return (
-      <Card className="max-w-md mx-auto mt-10 p-4">
-        <CardContent>
-          <h2 className="text-xl font-bold mb-4">Login / Signup</h2>
-          <Input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-          <Input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} className="mt-2" />
-          <div className="flex gap-2 mt-4">
-            <Button onClick={handleLogin}>Login</Button>
-            <Button onClick={handleSignup}>Sign Up</Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="card">
+        <h2>Login / Signup</h2>
+        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+        <div className="btn-group">
+          <button onClick={handleLogin}>Login</button>
+          <button onClick={handleSignup}>Sign Up</button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 space-y-6">
-      <Button onClick={logout} className="mb-4">Logout</Button>
+    <div className="container">
+      <button className="logout-btn" onClick={logout}>Logout</button>
 
-      <Card>
-        <CardContent className="p-4">
-          <h2 className="text-lg font-semibold mb-2">Add Website</h2>
-          <Input placeholder="Website Name" onChange={(e) => setWebsiteName(e.target.value)} />
-          <Input placeholder="Website URL" onChange={(e) => setWebsiteUrl(e.target.value)} className="mt-2" />
-          <Button onClick={addWebsite} className="mt-2">Add</Button>
-        </CardContent>
-      </Card>
+      <div className="card">
+        <h2>Add Website</h2>
+        <input placeholder="Website Name" onChange={(e) => setWebsiteName(e.target.value)} />
+        <input placeholder="Website URL" onChange={(e) => setWebsiteUrl(e.target.value)} />
+        <button onClick={addWebsite}>Add</button>
+      </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <h2 className="text-lg font-semibold mb-2">Save Credentials</h2>
-          <select
-            value={selectedWebsite}
-            onChange={(e) => setSelectedWebsite(e.target.value)}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">Select Website</option>
-            {websites.map((site) => (
-              <option key={site.id} value={site.id}>
-                {site.name}
-              </option>
-            ))}
-          </select>
-          <Input placeholder="Site Username" onChange={(e) => setSiteUsername(e.target.value)} className="mt-2" />
-          <Input placeholder="Site Password" type="password" onChange={(e) => setSitePassword(e.target.value)} className="mt-2" />
-          <Button onClick={savePasswordDetails} className="mt-2">Save</Button>
-        </CardContent>
-      </Card>
+      <div className="card">
+        <h2>Save Credentials</h2>
+        <select value={selectedWebsite} onChange={(e) => setSelectedWebsite(e.target.value)}>
+          <option value="">Select Website</option>
+          {websites.map((site) => (
+            <option key={site.id} value={site.id}>{site.name}</option>
+          ))}
+        </select>
+        <input placeholder="Site Username" onChange={(e) => setSiteUsername(e.target.value)} />
+        <input type="password" placeholder="Site Password" onChange={(e) => setSitePassword(e.target.value)} />
+        <button onClick={savePasswordDetails}>Save</button>
+      </div>
     </div>
+  );
+}
+
+export default function AppWrapper() {
+  return (
+    <ToastProvider>
+      <PasswordManagerApp />
+    </ToastProvider>
   );
 }
